@@ -65,7 +65,7 @@ impl BinaryData {
     pub fn to_hex_string(&self) -> String {
         self.data
             .iter()
-            .map(|byte| format!("{:02X}", byte))
+            .map(|byte: &u8 | format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join("")
     }

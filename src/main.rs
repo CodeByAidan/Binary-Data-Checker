@@ -10,9 +10,8 @@ use crate::lib::binary_data_lib::BinaryData;
 
 
 fn main() -> io::Result<()> {
-    // Initialize the logger without timestamp
     env_logger::builder()
-        .format_timestamp(None) // Disable timestamp
+        .format_timestamp(None)
         .filter_level(LevelFilter::Info)
         .init();
 
