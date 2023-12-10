@@ -1,0 +1,27 @@
+# i hate dependabot and renovate. it floods my inbox.
+name: Renovate Auto-Merge
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Auto-merge Renovate PR
+        if: github.actor == 'renovate[bot]'
+        run: |
+          # Approve the PR
+          gh pr review --approve ${{ github.event.number }}
+
+          # Merge the PR
+          gh pr merge --auto ${{ github.event.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
