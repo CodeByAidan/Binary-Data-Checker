@@ -1,17 +1,26 @@
 #![allow(special_module_name)]
+
 use std::env;
-use std::io::{self};
+use std::io;
+use log::error;
+use log::{info, LevelFilter};
 
 mod lib;
-use crate::lib::binary_data_lib::{generate_binary_file, read_binary_file};
+use crate::lib::binary_data_lib::BinaryData;
 
 
 fn main() -> io::Result<()> {
+    // Initialize the logger without timestamp
+    env_logger::builder()
+        .format_timestamp(None) // Disable timestamp
+        .filter_level(LevelFilter::Info)
+        .init();
+
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 1 && args[1] == "--generate" {
-        generate_binary_file()?;
-        println!("Binary file generated successfully.");
+        BinaryData::generate_binary_file()?;
+        info!("Binary file generated successfully.");
         return Ok(());
     }
 
@@ -20,16 +29,38 @@ fn main() -> io::Result<()> {
     let file_path: std::path::PathBuf = current_dir.join(relative_path);
 
     if !file_path.exists() {
-        eprintln!("Error: Binary file not found. Please generate it using 'cargo run --bin binary_data_checker -- --generate'");
+        error!(
+            "Binary file '{}' does not exist. Please generate it using 'cargo run --bin binary_data_checker -- --generate' first.",
+            file_path.display()
+        );
         return Ok(());
     }
 
-    let mut binary_data: Vec<u8> = Vec::new();
-    read_binary_file(&file_path, &mut binary_data)?;
+    let mut binary_data = BinaryData { data: Vec::new() };
+    BinaryData::read_binary_file(&file_path, &mut binary_data.data)?;
 
-    println!("Binary Data:");
-    println!(" - Bytes: {:?}", binary_data);
-    println!(" - Bits: {:?}", binary_data.iter().map(|byte| format!("{:08b}", byte)).collect::<Vec<String>>());
+    info!("Binary Data:");
+    info!(" - Bytes: {:?}", binary_data.data);
+    info!(
+        " - Bits: {:?}",
+        binary_data
+            .data
+            .iter()
+            .map(|byte| format!("{:08b}", byte))
+            .collect::<Vec<String>>()
+    );
+
+    binary_data.flip_bits();
+    info!("Flipped Bits: {:?}", binary_data.data);
+
+    if let Some(extracted_range) = binary_data.extract_range(2, 5) {
+        info!("Extracted Range (2-5): {:?}", extracted_range);
+    } else {
+        info!("Invalid range specified for extraction.");
+    }
+
+    let hex_string = binary_data.to_hex_string();
+    info!("Hex Representation: {}", hex_string);
 
     let mut bit_count: u32 = 0;
     let mut byte_count: u32 = 0;
@@ -39,7 +70,7 @@ fn main() -> io::Result<()> {
     let mut bit_min: u8 = 255;
     let mut byte_max: u8 = 0;
     let mut byte_min: u8 = 255;
-    for byte in binary_data.iter() {
+    for byte in binary_data.data.iter() {
         byte_count += 1;
         byte_sum += *byte as u32;
         if *byte > byte_max {
@@ -62,17 +93,17 @@ fn main() -> io::Result<()> {
     let bit_avg: f32 = bit_sum as f32 / bit_count as f32;
     let byte_avg: f32 = byte_sum as f32 / byte_count as f32;
 
-    println!("Analysis:");
-    println!(" - Bits: {}", bit_count);
-    println!(" - Bytes: {}", byte_count);
-    println!(" - Bit Sum: {}", bit_sum);
-    println!(" - Byte Sum: {}", byte_sum);
-    println!(" - Bit Average: {}", bit_avg);
-    println!(" - Byte Average: {}", byte_avg);
-    println!(" - Bit Max: {}", bit_max);
-    println!(" - Byte Max: {}", byte_max);
-    println!(" - Bit Min: {}", bit_min);
-    println!(" - Byte Min: {}", byte_min);
+    info!("Analysis:");
+    info!(" - Bits: {}", bit_count);
+    info!(" - Bytes: {}", byte_count);
+    info!(" - Bit Sum: {}", bit_sum);
+    info!(" - Byte Sum: {}", byte_sum);
+    info!(" - Bit Average: {}", bit_avg);
+    info!(" - Byte Average: {}", byte_avg);
+    info!(" - Bit Max: {}", bit_max);
+    info!(" - Byte Max: {}", byte_max);
+    info!(" - Bit Min: {}", bit_min);
+    info!(" - Byte Min: {}", byte_min);
 
     Ok(())
 }

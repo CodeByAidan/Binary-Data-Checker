@@ -53,10 +53,11 @@ The checker will read the binary file and perform basic analysis, displaying the
 
 ## Dependencies
 
-- `std::{env, fs, path::PathBuf}`: Standard library modules for working with the filesystem.
-- `std::io::{self, Read, Write}`: Standard library modules for working with input/output.
-- `std::fs::File`: Standard library module for working with files.
-- `std::path::Path`: Standard library module for working with paths.
+- `log::{error, info, LevelFilter}`: Logging (error/info)
+- `std::fs::File`: File I/O operations (read/write)
+- `std::io::{self, Read, Write}`: I/O operations (read/write)
+- `std::{env, fmt, fs}`: Filesystem operations and formatting (buffered)
+- `std::{path::PathBuf, path::Path}`: Filesystem paths and operations (buffered)
 
 ## License
 
