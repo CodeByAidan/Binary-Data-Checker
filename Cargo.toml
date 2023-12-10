@@ -1,0 +1,12 @@
+[package]
+name = "binary_data_checker"
+version = "0.1.0"
+edition = "2021"
+
+resolver = "2"
+
+[dependencies]
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
